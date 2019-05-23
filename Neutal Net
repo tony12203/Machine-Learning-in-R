@@ -1,0 +1,22 @@
+> library(quantmod)
+> library(neuralnet)
+> getSymbols("IBM", src = "yahoo", from = "2017-01-01")
+> Result = Cl(IBM) - Op(IBM)
+> BB = BBands(Op(IBM), n = 20, sd = 2)
+> BB = BB[,4]
+> DC = DonchianChannel(Op(IBM))[,'mid']
+> EMA7 = EMA(Op(IBM), n = 7)
+> EMAcross = EMA7 - Op(IBM)
+> MACD_signal = MACD(Op(IBM), fast = 12, slow = 26, signal = 9)[,2]
+> RSI14 = RSI(Op(IBM), n = 14)
+> DataSet = data.frame(Result, BB, DC, EMAcross, MACD_signal, RSI14)
+> DataSet = DataSet[-c(1:33),]
+> DataSet = data.frame(Result, BB, DC, EMAcross, MACD_signal, RSI14)
+> DataSet = DataSet[-c(1:33),]
+> colnames(DataSet) = c("Result", "BB", "DC", "EMAcross", "MACD_signal", "RSI14")
+> Normal = function(x) {(x - min(x))/(max(x) - min(x))}
+> NormalData = as.data.frame(lapply(DataSet, Normal))
+> Set_Training = NormalData[1:362,]
+> Set_Test = NormalData[363:543,]
+> net1 = neuralnet(Result ~ BB + DC + EMAcross + MACD_signal + RSI14, data = Set_Training, hidden = c(3,3), learningrate = 0.001, algorithm = "backprop")
+> plot(net1)
