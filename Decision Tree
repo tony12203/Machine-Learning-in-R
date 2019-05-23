@@ -1,0 +1,21 @@
+> library(quantmod)
+> library(rpart)
+> library(rpart.plot)
+> getSymbols("IBM", src = "yahoo", from = "2017-01-01")
+> Result = ifelse(Cl(IBM) - Op(IBM) > 0, "ВВЕРХ", "ВНИЗ")
+> BB = BBands(Op(IBM), n = 20, sd = 2)[,4]
+> EMA7 = EMA(Op(IBM), n = 7)
+> EMAcross = EMA7 - Op(IBM)
+> MACD_signal = MACD(Op(IBM), fast = 12, slow = 26, signal = 9)[,2]
+> DataSet = data.frame(Result, BB, EMAcross, MACD_signal)
+> DataSet = DataSet[-c(1:33),]
+> colnames(DataSet) = c("Result", "BB", "EMAcross", "MACD_signal")
+> Set_Training = DataSet[1:362,]
+> Set_Test = DataSet[363:543,]
+> Decision_Tree = rpart(Result~BB+EMAcross+MACD_signal, data = Set_Training, cp = 0.001)
+> prp(Decision_Tree, type = 2, extra = 6)
+> printcp(Decision_Tree)
+> plotcp(Decision_Tree,upper="splits")
+> Decision_Tree_2 = rpart(Result~BB+EMAcross+MACD_signal, data = Set_Training, cp = .0286624)
+> prp(Decision_Tree_2, type = 2, extra = 6)
+> table(predict(Decision_Tree_2, Set_Test, type = "class"), Set_Test[,1], dnn = list('предсказанное','фактическое'))
