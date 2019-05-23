@@ -1,0 +1,17 @@
+> library(quantmod)
+> library(e1071)
+> library(lubridate)
+> Result = ifelse(Cl(IBM) - Op(IBM) > 0, "ВВЕРХ", "ВНИЗ")
+> WeekDay = wday(IBM, label = TRUE)
+> DataSet = data.frame(Result, WeekDay)
+> Model = naiveBayes(DataSet[,2],DataSet[,1])
+> MACD_signal = MACD(Op(IBM), fast = 12, slow = 26, signal = 9)[,2]
+> MACD_signal = round(MACD_signal, 2)
+> DataSet_2 = data.frame(DataSet, MACD_signal)
+> DataSet_2 = DataSet_2[-c(1:33),]
+> colnames(DataSet_2) = c("Result", "WeekDay", "MACD_signal")
+> Set_Training = DataSet_2[1:373,]
+> Set_Test = DataSet_2[374:559,]
+> Model_2 = naiveBayes(Set_Training[,2:3], Set_Training[,1])
+> Model_2
+> table(predict(Model_2, Set_Test), Set_Test[,1], dnn = list('предсказанное','фактическое'))
